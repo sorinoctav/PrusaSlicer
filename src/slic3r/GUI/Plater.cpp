@@ -79,6 +79,8 @@
 #include "../Utils/FixModelByWin10.hpp"
 #include "../Utils/UndoRedo.hpp"
 #include "RemovableDriveManager.hpp"
+#include "InstanceCheck.hpp"
+
 #if ENABLE_NON_STATIC_CANVAS_MANAGER
 #ifdef __APPLE__
 #include "Gizmos/GLGizmosManager.hpp"
@@ -2218,6 +2220,12 @@ Plater::priv::priv(Plater *q, MainFrame *main_frame)
 
     // Initialize the Undo / Redo stack with a first snapshot.
     this->take_snapshot(_(L("New Project")));
+
+    this->q->Bind(EVT_LOAD_MODEL_OTHER_INSTANCE, [this](LoadFromOtherInstanceEvent &evt) { 
+        this->load_files(evt.data, true, true);
+    });
+	wxGetApp().other_instance_message_handler()->init(this->q);
+
 }
 
 Plater::priv::~priv()
@@ -2353,7 +2361,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
         bool is_project_file = type_prusa;
         try {
             if (type_3mf || type_zip_amf) {
-                DynamicPrintConfig config;
+                 DynamicPrintConfig config;
                 {
                     DynamicPrintConfig config_loaded;
                     model = Slic3r::Model::read_from_archive(path.string(), &config_loaded, false, load_config);

@@ -49,6 +49,7 @@
 #include "UpdateDialogs.hpp"
 #include "Mouse3DController.hpp"
 #include "RemovableDriveManager.hpp"
+#include "InstanceCheck.hpp"
 
 #ifdef __WXMSW__
 #include <dbt.h>
@@ -252,6 +253,7 @@ GUI_App::GUI_App()
     , m_imgui(new ImGuiWrapper())
     , m_wizard(nullptr)
 	, m_removable_drive_manager(std::make_unique<RemovableDriveManager>())
+	, m_other_instance_message_handler(std::make_unique<OtherInstanceMessageHandler>())
 {}
 
 GUI_App::~GUI_App()
@@ -264,6 +266,8 @@ GUI_App::~GUI_App()
 
     if (preset_updater != nullptr)
         delete preset_updater;
+
+	
 }
 
 #if ENABLE_NON_STATIC_CANVAS_MANAGER
@@ -295,6 +299,7 @@ bool GUI_App::OnInit()
 
 bool GUI_App::on_init_inner()
 {
+
     // Verify resources path
     const wxString resources_dir = from_u8(Slic3r::resources_dir());
     wxCHECK_MSG(wxDirExists(resources_dir), false,
@@ -407,6 +412,7 @@ bool GUI_App::on_init_inner()
 				preset_updater->slic3r_update_notify();
 				preset_updater->sync(preset_bundle);
 				});
+
         }
     });
 

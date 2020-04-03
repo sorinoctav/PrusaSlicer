@@ -7,6 +7,8 @@
 #include <shellapi.h>
 #include <wchar.h>
 
+
+
 #ifdef SLIC3R_GUI
 extern "C"
 {
@@ -31,6 +33,8 @@ extern "C"
 #include <boost/algorithm/string/classification.hpp>
 
 #include <stdio.h>
+
+
 
 #ifdef SLIC3R_GUI
 class OpenGLVersionCheck
@@ -200,6 +204,8 @@ protected:
 bool OpenGLVersionCheck::message_pump_exit = false;
 #endif /* SLIC3R_GUI */
 
+
+
 extern "C" {
     typedef int (__stdcall *Slic3rMainFunc)(int argc, wchar_t **argv);
     Slic3rMainFunc slic3r_main = nullptr;
@@ -216,7 +222,12 @@ int APIENTRY wWinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, 
 int wmain(int argc, wchar_t **argv)
 {
 #endif
-
+	/*
+	if (Slic3r::InstanceCheck::instance_check().check_with_message())
+	{
+		return -1;
+	}
+	*/
     std::vector<wchar_t*> argv_extended;
     argv_extended.emplace_back(argv[0]);
 
