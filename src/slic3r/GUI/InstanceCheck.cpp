@@ -36,7 +36,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-
+static HWND PrusaSlicerHWND;
 static BOOL CALLBACK EnumWindowsProc(_In_ HWND   hwnd, _In_ LPARAM lParam)
 {
 	//checks for other instances of prusaslicer, if found brings it to front and return false to stop enumeration and quit this instance
@@ -49,7 +49,8 @@ static BOOL CALLBACK EnumWindowsProc(_In_ HWND   hwnd, _In_ LPARAM lParam)
 	std::wstring classNameString(className);
 	std::wstring wndTextString(wndText);
 	if (wndTextString.find(L"PrusaSlicer") != std::wstring::npos && classNameString == L"wxWindowNR") {
-		std::wcout << L"found " << wndTextString << std::endl;
+		//std::wcout << L"found " << wndTextString << std::endl;
+		PrusaSlicerHWND = hwnd;
 		ShowWindow(hwnd, SW_SHOWMAXIMIZED);
 		SetForegroundWindow(hwnd);
 		return false;
@@ -145,12 +146,11 @@ bool instance_check(int argc, char** argv)
 	if (cla.should_send) {
 		// Call EnumWidnows with own callback. cons: Based on text in the name of the window and class name which is generic.
 		if (!EnumWindows(EnumWindowsProc, 0)) {
-
+			instance_check_internal::send_message(PrusaSlicerHWND);
 			//printf("Another instance of PrusaSlicer is already running.\n");
-			LPWSTR command_line_args = GetCommandLine();
 			HWND hwndListener;
 			if ((hwndListener = FindWindow(NULL, L"PrusaSlicer_listener_window")) != NULL) {
-				instance_check_internal::send_message(hwndListener);
+				//instance_check_internal::send_message(hwndListener);
 			}
 			else {
 				//printf("Listener window not found - teminating without sent info.\n");
@@ -490,6 +490,7 @@ void OtherInstanceMessageHandler::handle_message(const std::string message) {
 	auto                                 next_space = message.find(' ');
 	size_t                               last_space = 0;
 	int                                  counter = 0;
+	BOOST_LOG_TRIVIAL(error) << "got message " << message;
 	while (next_space != std::string::npos)
 	{
 		const std::string possible_path = message.substr(last_space, next_space - last_space);
@@ -510,6 +511,7 @@ void OtherInstanceMessageHandler::handle_message(const std::string message) {
 		}
 	}
 }
+
 #ifdef BACKGROUND_MESSAGE_LISTENER
 void OtherInstanceMessageHandler::listen()
 {
