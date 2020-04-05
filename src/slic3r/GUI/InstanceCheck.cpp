@@ -268,11 +268,10 @@ bool instance_check(int argc, char** argv)
 {
 	if (!instance_check_internal::get_lock()) {
 		std::cout << "Process already running!" << std::endl;
-		std::string pid_string = instance_check_internal::
-			get_pid_string_by_name("prusa-slicer");
+		std::string pid_string = instance_check_internal::get_pid_string_by_name("prusa-slicer");
 		if (pid_string != "") {
 			std::cout << "pid " << pid_string << std::endl;
-			send_message();
+			instance_check_internal::send_message();
 		}
 		return true;
 	}
@@ -457,7 +456,7 @@ void OtherInstanceMessageHandler::init(wxEvtHandler* callback_evt_handler)
 	this->register_for_messages();
 #endif //__APPLE__
 
-#if BACKGROUND_MESSAGE_LISTENER
+#ifdef BACKGROUND_MESSAGE_LISTENER
 	m_thread = boost::thread((boost::bind(&OtherInstanceMessageHandler::listen, this)));
 #endif //BACKGROUND_MESSAGE_LISTENER
 }
@@ -469,7 +468,7 @@ void OtherInstanceMessageHandler::shutdown()
 		//delete macos implementation
 		this->unregister_for_messages();
 #endif //__APPLE__
-#if BACKGROUND_MESSAGE_LISTENER
+#ifdef BACKGROUND_MESSAGE_LISTENER
 		if (m_thread.joinable()) {
 			// Stop the worker thread, if running.
 			{
@@ -511,7 +510,7 @@ void OtherInstanceMessageHandler::handle_message(const std::string message) {
 		}
 	}
 }
-#if BACKGROUND_MESSAGE_LISTENER
+#ifdef BACKGROUND_MESSAGE_LISTENER
 void OtherInstanceMessageHandler::listen()
 {
 #ifndef  __linux__
