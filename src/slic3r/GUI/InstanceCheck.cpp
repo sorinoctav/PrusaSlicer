@@ -100,21 +100,20 @@ namespace instance_check_internal
 		bool           should_send;
 		std::string    cl_string;
 	};
-	static CommandLineAnalysis process_command_line(int argc, char** argv)
+	static CommandLineAnalysis process_command_line(int argc, char** argv) //d:\3dmodels\Klapka\Klapka.3mf
 	{
-		CommandLineAnalysis ret{ true };//{ false };
-		if (argc == 0)
+		CommandLineAnalysis ret { false };
+		if (argc < 2)
 			return ret;
 		ret.cl_string = argv[0];
 		for (size_t i = 1; i < argc; i++) {
-			//		if (argv[i][0] == '-')
-			//		{
-			//			if(argv[i][1] == 's')
-			ret.should_send = true;
-			//		} else {
-			ret.cl_string += " ";
-			ret.cl_string += argv[i];
-			//		}
+			std::string token = argv[i];
+			if (token == "--single-instance") {
+				ret.should_send = true;
+			} else {
+				ret.cl_string += " ";
+				ret.cl_string += token;
+			}
 		}
 		return ret;
 	}
