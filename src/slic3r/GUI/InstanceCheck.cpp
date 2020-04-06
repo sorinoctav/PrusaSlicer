@@ -12,86 +12,6 @@
 #include <dbus/dbus.h> /* Pull in all of D-Bus headers. */
 #endif //__linux__
 
-#if _WIN32 
-//win32 callbacks
-//catching message from another instance
-static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	TCHAR lpClassName[1000];
-	GetClassName(hWnd, lpClassName, 100);
-	switch (message) {
-	case WM_COPYDATA:
-	{
-		COPYDATASTRUCT* copy_data_structure = { 0 };
-		copy_data_structure = (COPYDATASTRUCT*)lParam;
-		if (copy_data_structure->dwData == 1) {
-			LPCWSTR arguments = (LPCWSTR)copy_data_structure->lpData;
-			//Slic3r::InstanceCheck::instance_check().handle_message(boost::nowide::narrow(arguments));
-			Slic3r::GUI::wxGetApp().other_instance_message_handler()->handle_message(boost::nowide::narrow(arguments));
-		}
-
-	}
-	break;
-	}
-	return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
-static HWND PrusaSlicerHWND;
-static BOOL CALLBACK EnumWindowsProc(_In_ HWND   hwnd, _In_ LPARAM lParam)
-{
-	//checks for other instances of prusaslicer, if found brings it to front and return false to stop enumeration and quit this instance
-	//search is done by classname(wxWindowNR is wxwidgets thing, so probably not unique) and name in window upper panel
-	//other option would be do a mutex and check for its existence
-	TCHAR wndText[1000];
-	TCHAR className[1000];
-	GetClassName(hwnd, className, 1000);
-	GetWindowText(hwnd, wndText, 1000);
-	std::wstring classNameString(className);
-	std::wstring wndTextString(wndText);
-	if (wndTextString.find(L"PrusaSlicer") != std::wstring::npos && classNameString == L"wxWindowNR") {
-		//std::wcout << L"found " << wndTextString << std::endl;
-		PrusaSlicerHWND = hwnd;
-		ShowWindow(hwnd, SW_SHOWMAXIMIZED);
-		SetForegroundWindow(hwnd);
-		return false;
-	}
-	return true;
-}
-
-static void create_listener_window()
-{
-	WNDCLASSEX wndClass = { 0 };
-	wndClass.cbSize = sizeof(WNDCLASSEX);
-	wndClass.hInstance = reinterpret_cast<HINSTANCE>(GetModuleHandle(0));
-	wndClass.lpfnWndProc = reinterpret_cast<WNDPROC>(WndProc);//this is callback
-	wndClass.lpszClassName = L"PrusaSlicer_single_instance_listener_class";
-	if (!RegisterClassEx(&wndClass)) {
-		DWORD err = GetLastError();
-		return;
-	}
-
-	HWND hWnd = CreateWindowEx(
-		0,//WS_EX_NOACTIVATE,
-		L"PrusaSlicer_single_instance_listener_class",
-		L"PrusaSlicer_listener_window",
-		WS_OVERLAPPEDWINDOW,//WS_DISABLED, // style
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		NULL, NULL,
-		GetModuleHandle(NULL),
-		NULL);
-	if (hWnd == NULL) {
-		DWORD err = GetLastError();
-	}
-	else {
-		//ShowWindow(hWnd, SW_SHOWNORMAL);
-		UpdateWindow(hWnd);
-	}
-}
-#endif //_WIN32 
-
 namespace Slic3r {
 namespace instance_check_internal
 {
@@ -123,6 +43,26 @@ namespace instance_check_internal
 
 namespace instance_check_internal
 {
+	static HWND l_prusa_slicer_hwnd;
+	static BOOL CALLBACK EnumWindowsProc(_In_ HWND   hwnd, _In_ LPARAM lParam)
+	{
+		//checks for other instances of prusaslicer, if found brings it to front and return false to stop enumeration and quit this instance
+		//search is done by classname(wxWindowNR is wxwidgets thing, so probably not unique) and name in window upper panel
+		//other option would be do a mutex and check for its existence
+		TCHAR wndText[1000];
+		TCHAR className[1000];
+		GetClassName(hwnd, className, 1000);
+		GetWindowText(hwnd, wndText, 1000);
+		std::wstring classNameString(className);
+		std::wstring wndTextString(wndText);
+		if (wndTextString.find(L"PrusaSlicer") != std::wstring::npos && classNameString == L"wxWindowNR") {
+			l_prusa_slicer_hwnd = hwnd;
+			ShowWindow(hwnd, SW_SHOWMAXIMIZED);
+			SetForegroundWindow(hwnd);
+			return false;
+		}
+		return true;
+	}
 	static void send_message(const HWND hwnd)
 	{
 		LPWSTR command_line_args = GetCommandLine();
@@ -144,8 +84,8 @@ bool instance_check(int argc, char** argv)
 	instance_check_internal::CommandLineAnalysis cla = instance_check_internal::process_command_line(argc, argv);
 	if (cla.should_send) {
 		// Call EnumWidnows with own callback. cons: Based on text in the name of the window and class name which is generic.
-		if (!EnumWindows(EnumWindowsProc, 0)) {
-			instance_check_internal::send_message(PrusaSlicerHWND);
+		if (!EnumWindows(instance_check_internal::EnumWindowsProc, 0)) {
+			instance_check_internal::send_message(instance_check_internal::l_prusa_slicer_hwnd);
 			//printf("Another instance of PrusaSlicer is already running.\n");
 			HWND hwndListener;
 			if ((hwndListener = FindWindow(NULL, L"PrusaSlicer_listener_window")) != NULL) {
