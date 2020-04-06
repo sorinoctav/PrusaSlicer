@@ -102,7 +102,7 @@ namespace instance_check_internal
 	};
 	static CommandLineAnalysis process_command_line(int argc, char** argv)
 	{
-		CommandLineAnalysis ret{ false };
+		CommandLineAnalysis ret{ true };//{ false };
 		if (argc == 0)
 			return ret;
 		ret.cl_string = argv[0];
@@ -449,7 +449,7 @@ void OtherInstanceMessageHandler::init(wxEvtHandler* callback_evt_handler)
 	m_callback_evt_handler = callback_evt_handler;
 
 #if _WIN32 
-	create_listener_window();
+	//create_listener_window();
 #endif  //_WIN32
 
 #if defined(__APPLE__)
