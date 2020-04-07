@@ -338,7 +338,8 @@ bool GUI_App::on_init_inner()
     if (data_dir().empty())
         set_data_dir(wxStandardPaths::Get().GetUserDataDir().ToUTF8().data());
 
-    app_config = new AppConfig();
+	if (!app_config)
+		app_config = new AppConfig();
     preset_bundle = new PresetBundle();
 
     // just checking for existence of Slic3r::data_dir is not enough : it may be an empty directory

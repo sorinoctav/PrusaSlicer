@@ -62,27 +62,6 @@ PrinterTechnology get_printer_technology(const DynamicConfig &config)
     return (opt == nullptr) ? ptUnknown : opt->value;
 }
 
-/*
-bool instance_check(int argc, char** argv)
-{
-	bool gui_single_instance_setting = false;
-#ifdef SLIC3R_GUI
-	if (data_dir().empty())
-		set_data_dir(wxStandardPaths::Get().GetUserDataDir().ToUTF8().data());
-
-	AppConfig* app_config = new AppConfig();
-
-	if (app_config->exists()) {
-		app_config->load();
-	}
-	gui_single_instance_setting = app_config->get("single_instance") == "1";
-#endif // SLIC3R_GUI 
-	if (Slic3r::instance_check(argc, argv, gui_single_instance_setting)) {
-		return false;
-	}
-	return true;
-}
-*/
 int CLI::run(int argc, char **argv)
 {
 // Switch boost::filesystem to utf8.
@@ -530,7 +509,9 @@ int CLI::run(int argc, char **argv)
 // #ifdef USE_WX
         GUI::GUI_App *gui = new GUI::GUI_App();
 
-
+		//we need to perform load appconfig for single_instance settings
+		//for that we need to establish Slic3r data directory
+		//possible problem is that app_gui does another app_config->load();
 		if (data_dir().empty())
 			set_data_dir(wxStandardPaths::Get().GetUserDataDir().ToUTF8().data());
 
@@ -542,9 +523,12 @@ int CLI::run(int argc, char **argv)
 
 		bool gui_single_instance_setting = app_config->get("single_instance") == "1";
 		if (Slic3r::instance_check(argc, argv, gui_single_instance_setting)) {
-			return false;
+			//TODO: do we have delete gui and other stuff?
+			return -1;
 		}
-
+		
+		gui->app_config = app_config;
+		app_config = nullptr;
 
 //		gui->autosave = m_config.opt_string("autosave");
         GUI::GUI_App::SetInstance(gui);
