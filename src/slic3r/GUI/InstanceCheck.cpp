@@ -35,6 +35,8 @@ namespace instance_check_internal
 				ret.cl_string += token;
 			}
 		}
+		//tracelevel is not set yet. therefore error for debug.
+		BOOST_LOG_TRIVIAL(error) << "single instance: "<< ret.should_send << ". other params: " << ret.cl_string;
 		return ret;
 	}
 } //namespace instance_check_internal
@@ -79,14 +81,15 @@ namespace instance_check_internal
 	}
 } //namespace instance_check_internal
 
-bool instance_check(int argc, char** argv)
+bool instance_check(int argc, char** argv, bool app_config_single_instance)
 {
 	instance_check_internal::CommandLineAnalysis cla = instance_check_internal::process_command_line(argc, argv);
-	if (cla.should_send) {
+	if (cla.should_send || app_config_single_instance) {
 		// Call EnumWidnows with own callback. cons: Based on text in the name of the window and class name which is generic.
 		if (!EnumWindows(instance_check_internal::EnumWindowsProc, 0)) {
 			instance_check_internal::send_message(instance_check_internal::l_prusa_slicer_hwnd);
 			//printf("Another instance of PrusaSlicer is already running.\n");
+			/*
 			HWND hwndListener;
 			if ((hwndListener = FindWindow(NULL, L"PrusaSlicer_listener_window")) != NULL) {
 				//instance_check_internal::send_message(hwndListener);
@@ -94,6 +97,7 @@ bool instance_check(int argc, char** argv)
 			else {
 				//printf("Listener window not found - teminating without sent info.\n");
 			}
+			*/
 			return true;
 		}
 	}
@@ -123,7 +127,7 @@ namespace instance_check_internal
 	}
 } //namespace instance_check_internal
 
-bool instance_check(int argc, char** argv)
+bool instance_check(int argc, char** argv, bool app_config_single_instance)
 {
 	if (!instance_check_internal::get_lock()) {
 		std::cout << "Process already running!" << std::endl;
@@ -203,7 +207,7 @@ namespace instance_check_internal
 	}
 } //namespace instance_check_internal
 
-bool instance_check(int argc, char** argv)
+bool instance_check(int argc, char** argv, bool app_config_single_instance)
 {
 	if (!instance_check_internal::get_lock()) {
 		std::cout << "Process already running!" << std::endl;
@@ -429,7 +433,9 @@ void OtherInstanceMessageHandler::handle_message(const std::string message) {
 	auto                                 next_space = message.find(' ');
 	size_t                               last_space = 0;
 	int                                  counter = 0;
-	BOOST_LOG_TRIVIAL(error) << "got message " << message;
+
+	BOOST_LOG_TRIVIAL(trace) << "message from other instance: " << message;
+
 	while (next_space != std::string::npos)
 	{
 		const std::string possible_path = message.substr(last_space, next_space - last_space);

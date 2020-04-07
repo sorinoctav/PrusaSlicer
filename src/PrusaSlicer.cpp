@@ -49,7 +49,9 @@
     #include "slic3r/GUI/GUI.hpp"
     #include "slic3r/GUI/GUI_App.hpp"
     #include "slic3r/GUI/3DScene.hpp"
-#include "slic3r/GUI/InstanceCheck.hpp"
+    #include "slic3r/GUI/InstanceCheck.hpp" 
+    #include "slic3r/GUI/AppConfig.hpp" 
+    #include <wx/stdpaths.h> //wxStandartPaths
 #endif /* SLIC3R_GUI */
 
 using namespace Slic3r;
@@ -60,15 +62,29 @@ PrinterTechnology get_printer_technology(const DynamicConfig &config)
     return (opt == nullptr) ? ptUnknown : opt->value;
 }
 
+/*
+bool instance_check(int argc, char** argv)
+{
+	bool gui_single_instance_setting = false;
+#ifdef SLIC3R_GUI
+	if (data_dir().empty())
+		set_data_dir(wxStandardPaths::Get().GetUserDataDir().ToUTF8().data());
+
+	AppConfig* app_config = new AppConfig();
+
+	if (app_config->exists()) {
+		app_config->load();
+	}
+	gui_single_instance_setting = app_config->get("single_instance") == "1";
+#endif // SLIC3R_GUI 
+	if (Slic3r::instance_check(argc, argv, gui_single_instance_setting)) {
+		return false;
+	}
+	return true;
+}
+*/
 int CLI::run(int argc, char **argv)
 {
-#ifdef SLIC3R_GUI
-	if (Slic3r::instance_check(argc, argv))
-	{
-		return -1;
-	}
-#endif /* SLIC3R_GUI */
-
 // Switch boost::filesystem to utf8.
     try {
         boost::nowide::nowide_filesystem();
@@ -513,6 +529,23 @@ int CLI::run(int argc, char **argv)
 #ifdef SLIC3R_GUI
 // #ifdef USE_WX
         GUI::GUI_App *gui = new GUI::GUI_App();
+
+
+		if (data_dir().empty())
+			set_data_dir(wxStandardPaths::Get().GetUserDataDir().ToUTF8().data());
+
+		AppConfig* app_config = new AppConfig();
+
+		if (app_config->exists()) {
+			app_config->load();
+		}
+
+		bool gui_single_instance_setting = app_config->get("single_instance") == "1";
+		if (Slic3r::instance_check(argc, argv, gui_single_instance_setting)) {
+			return false;
+		}
+
+
 //		gui->autosave = m_config.opt_string("autosave");
         GUI::GUI_App::SetInstance(gui);
         gui->CallAfter([gui, this, &load_configs] {

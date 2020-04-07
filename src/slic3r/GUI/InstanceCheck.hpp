@@ -1,9 +1,11 @@
 #ifndef slic3r_InstanceCheck_hpp_
 #define slic3r_InstanceCheck_hpp_
 
+#include "Event.hpp"
+
 #if _WIN32
 #include <windows.h>
-#endif
+#endif //_WIN32
 
 #include <string>
 
@@ -13,12 +15,11 @@
 #include <tbb/mutex.h>
 #include <condition_variable>
 
-// Custom wxWidget events
-#include "Event.hpp"
+
 
 namespace Slic3r {
 
-bool instance_check(int argc, char** argv);
+bool instance_check(int argc, char** argv, bool app_config_single_instance);
 
 #if __APPLE__
 void send_message_mac(const std::string msg);

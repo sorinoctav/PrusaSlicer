@@ -44,7 +44,6 @@ void PrintConfigDef::init_common_params()
 	def->mode = comAdvanced;
 	def->set_default_value(new ConfigOptionBool(false));
 
-
     def = this->add("printer_technology", coEnum);
     def->label = L("Printer technology");
     def->tooltip = L("Printer technology");
