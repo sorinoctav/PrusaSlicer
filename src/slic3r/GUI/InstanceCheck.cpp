@@ -35,7 +35,6 @@ namespace instance_check_internal
 				ret.cl_string += token;
 			}
 		}
-		//tracelevel is not set yet. therefore error for debug.
 		BOOST_LOG_TRIVIAL(error) << "single instance: "<< ret.should_send << ". other params: " << ret.cl_string;
 		return ret;
 	}
@@ -130,14 +129,12 @@ namespace instance_check_internal
 bool instance_check(int argc, char** argv, bool app_config_single_instance)
 {
 	instance_check_internal::CommandLineAnalysis cla = instance_check_internal::process_command_line(argc, argv);
-	if (cla.should_send || app_config_single_instance) {
-		if (!instance_check_internal::get_lock()) {
-			std::cout << "Another instance found." << std::endl;
-			send_message_mac(cla.cl_string);
-			return true;
-		}
+	if (!instance_check_internal::get_lock() && (cla.should_send || app_config_single_instance)) {
+		BOOST_LOG_TRIVIAL(error) << "instance check: Another instance found.";
+		send_message_mac(cla.cl_string);
+		return true;
 	}
-	
+	BOOST_LOG_TRIVIAL(error) << "instance check: Another instance NOT found.";
 	return false;
 }
 
