@@ -30,8 +30,8 @@ namespace Slic3r {
 
 void send_message_mac(const std::string msg)
 {
-	NSLog(@"sending msg %@", msg);
 	NSString *nsmsg = [NSString stringWithCString:msg.c_str() encoding:[NSString defaultCStringEncoding]];
+	NSLog(@"sending msg %@", nsmsg);
 	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:@"OtherPrusaSlicerTerminating" object:nil userInfo:[NSDictionary dictionaryWithObject:nsmsg forKey:@"data"]];
 }
 
