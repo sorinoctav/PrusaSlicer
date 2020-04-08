@@ -18,11 +18,15 @@
 
 
 namespace Slic3r {
-
-bool instance_check(int argc, char** argv, bool app_config_single_instance);
+// checks for other running instances and sends them argv,
+// if there is --single-instance argument or AppConfig is set to single_instance=1
+// returns true if this instance should terminate
+bool    instance_check(int argc, char** argv, bool app_config_single_instance);
 
 #if __APPLE__
-void send_message_mac(const std::string msg);
+// apple implementation of inner functions of instance_check
+// in InstanceCheckMac.mm
+void    send_message_mac(const std::string msg);
 #endif //__APPLE__
 
 namespace GUI {
@@ -42,13 +46,18 @@ public:
 	void operator=(OtherInstanceMessageHandler const&) = delete;
 	~OtherInstanceMessageHandler() { assert(!m_initialized); }
 
-	//inits listening, on each platform different. On linux starts background thread
-	void init(wxEvtHandler* callback_evt_handler);
+	// inits listening, on each platform different. On linux starts background thread
+	void    init(wxEvtHandler* callback_evt_handler);
 	// stops listening, on linux stops the background thread
-	void shutdown();
+	void    shutdown();
 
-	//finds paths to models in message(= command line arguments, first should be prusaSlicer executable) and sends them to plater via LoadFromOtherInstanceEvent
-	void handle_message(const std::string message);
+	//finds paths to models in message(= command line arguments, first should be prusaSlicer executable)
+	//and sends them to plater via LoadFromOtherInstanceEvent
+	//security of messages: from message all existing paths are proccesed to load model 
+	//						win32 - anybody who has hwnd can send message.
+	//						mac - anybody who posts notification with name:@"OtherPrusaSlicerTerminating"
+	//						linux - dbus
+	void    handle_message(const std::string message);
 
 private:
 	bool                    m_initialized { false };
@@ -63,13 +72,13 @@ private:
 	bool					m_start{ true };
 	
 	// background thread method
-	void listen();
+	void    listen();
 #endif //BACKGROUND_MESSAGE_LISTENER
 
 #if __APPLE__
 	//implemented at InstanceCheckMac.mm
-	void register_for_messages();
-	void unregister_for_messages();
+	void    register_for_messages();
+	void    unregister_for_messages();
 	// Opaque pointer to RemovableDriveManagerMM
 	void* m_impl_osx;
 #endif //__APPLE__

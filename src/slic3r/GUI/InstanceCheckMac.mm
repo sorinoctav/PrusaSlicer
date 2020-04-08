@@ -16,6 +16,9 @@
 
 -(void)message_update:(NSNotification *)msg
 {
+	//bring window to front
+	[hudWindow makeKeyAndOrderFront:nil];
+	//pass message
 	 Slic3r::GUI::wxGetApp().other_instance_message_handler()->handle_message(std::string([msg UTF8String]));
 }
 

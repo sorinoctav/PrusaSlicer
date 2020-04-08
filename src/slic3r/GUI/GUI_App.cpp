@@ -211,9 +211,7 @@ static void register_win32_device_notification_event()
     });
 
 	wxWindow::MSWRegisterMessageHandler(WM_COPYDATA, [](wxWindow* win, WXUINT /* nMsg */, WXWPARAM wParam, WXLPARAM lParam) {
-		// Some messages are sent to top level windows by default, some messages are sent to only registered windows, and we explictely register on MainFrame only.
-		//auto main_frame = dynamic_cast<MainFrame*>(win);
-		//auto plater = (main_frame == nullptr) ? nullptr : main_frame->plater();
+
 		COPYDATASTRUCT* copy_data_structure = { 0 };
 		copy_data_structure = (COPYDATASTRUCT*)lParam;
 		if (copy_data_structure->dwData == 1) {
