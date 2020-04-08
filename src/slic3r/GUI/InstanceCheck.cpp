@@ -129,11 +129,15 @@ namespace instance_check_internal
 
 bool instance_check(int argc, char** argv, bool app_config_single_instance)
 {
-	if (!instance_check_internal::get_lock()) {
-		std::cout << "Process already running!" << std::endl;
-		send_message_mac("message");
-		return true;
+	instance_check_internal::CommandLineAnalysis cla = instance_check_internal::process_command_line(argc, argv);
+	if (cla.should_send || app_config_single_instance) {
+		if (!instance_check_internal::get_lock()) {
+			std::cout << "Another instance found." << std::endl;
+			send_message_mac(cla.cl_string);
+			return true;
+		}
 	}
+	
 	return false;
 }
 
@@ -204,6 +208,7 @@ namespace instance_check_internal
 	}
 	static void send_message()
 	{
+		
 	}
 } //namespace instance_check_internal
 

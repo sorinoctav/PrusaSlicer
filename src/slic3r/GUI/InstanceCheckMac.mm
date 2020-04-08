@@ -11,11 +11,13 @@
 }
 -(void)add_observer
 {
+	NSLog(@"adding observer");
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(message_update:) name:@"OtherPrusaSlicerTerminating" object:nil];
 }
 
 -(void)message_update:(NSNotification *)msg
 {
+	NSLog(@"recieved msg %@", msg);
 	//bring window to front
 	[[[NSApplication sharedApplication] mainWindow] makeKeyAndOrderFront:nil];
 	//pass message
@@ -28,6 +30,7 @@ namespace Slic3r {
 
 void send_message_mac(const std::string msg)
 {
+	NSLog(@"sending msg %@", msg);
 	NSString *nsmsg = [NSString stringWithCString:msg.c_str() encoding:[NSString defaultCStringEncoding]];
 	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:@"OtherPrusaSlicerTerminating" object:nil userInfo:[NSDictionary dictionaryWithObject:nsmsg forKey:@"data"]];
 }
