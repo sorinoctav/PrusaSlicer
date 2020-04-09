@@ -18,8 +18,8 @@
 -(void)message_update:(NSNotification *)msg
 {
 	NSLog(@"recieved msg %@", msg);
-	NSLog(@"userinfo %@", msg->userInfo);
-	NSLog(@"userinfo data %@", msg->userInfo[@"data"]);
+	NSLog(@"userinfo %@", msg.userInfo);
+	NSLog(@"userinfo data %@", msg.userInfo[@"data"]);
 	//bring window to front
 	[[[NSApplication sharedApplication] mainWindow] makeKeyAndOrderFront:nil];
 	//pass message
