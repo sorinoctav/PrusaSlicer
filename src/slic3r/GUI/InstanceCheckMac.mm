@@ -18,12 +18,12 @@
 -(void)message_update:(NSNotification *)msg
 {
 	NSLog(@"recieved msg %@", msg);
-	//NSLog(@"userinfo %@", msg.userInfo);
-	//NSLog(@"userinfo data %@", msg.userInfo[@"data"]);
+	NSLog(@"userinfo %@", msg.userInfo);
+	NSLog(@"userinfo data %@", msg.userInfo[@"data"]);
 	//bring window to front
 	[[[NSApplication sharedApplication] mainWindow] makeKeyAndOrderFront:nil];
 	//pass message
-	//Slic3r::GUI::wxGetApp().other_instance_message_handler()->handle_message(std::string([msg->userInfo[@"data"] UTF8String]));
+	Slic3r::GUI::wxGetApp().other_instance_message_handler()->handle_message(std::string([msg->userInfo[@"data"] UTF8String]));
 }
 
 @end
@@ -33,7 +33,7 @@ namespace Slic3r {
 void send_message_mac(const std::string msg)
 {
 	NSString *nsmsg = [NSString stringWithCString:msg.c_str() encoding:[NSString defaultCStringEncoding]];
-	//NSLog(@"sending msg %@", nsmsg);
+	NSLog(@"sending msg %@", nsmsg);
 	[[NSDistributedNotificationCenter defaultCenter] postNotificationName:@"OtherPrusaSlicerTerminating" object:nil userInfo:[NSDictionary dictionaryWithObject:nsmsg forKey:@"data"]];
 }
 
@@ -49,7 +49,6 @@ void OtherInstanceMessageHandler::unregister_for_messages()
 {
 	if (m_impl_osx) {
         [m_impl_osx release];
-
         m_impl_osx = nullptr;
     }
 }
