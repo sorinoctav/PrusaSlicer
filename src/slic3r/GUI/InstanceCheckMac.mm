@@ -18,10 +18,12 @@
 -(void)message_update:(NSNotification *)msg
 {
 	NSLog(@"recieved msg %@", msg);
+	NSLog(@"userinfo %@", msg->userInfo);
+	NSLog(@"userinfo data %@", msg->userInfo[@"data"]);
 	//bring window to front
 	[[[NSApplication sharedApplication] mainWindow] makeKeyAndOrderFront:nil];
 	//pass message
-	 Slic3r::GUI::wxGetApp().other_instance_message_handler()->handle_message(std::string([msg.userInfo[@"data"] UTF8String]));
+	//Slic3r::GUI::wxGetApp().other_instance_message_handler()->handle_message(std::string([msg->userInfo[@"data"] UTF8String]));
 }
 
 @end
