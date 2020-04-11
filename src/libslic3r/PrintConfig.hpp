@@ -667,6 +667,7 @@ public:
     ConfigOptionBool                remaining_times;
     ConfigOptionBool                silent_mode;
     ConfigOptionFloat               extra_loading_move;
+    ConfigOptionFloat               tip_to_cooling_distance;
 
     std::string get_extrusion_axis() const
     {
@@ -740,6 +741,7 @@ protected:
         OPT_PTR(remaining_times);
         OPT_PTR(silent_mode);
         OPT_PTR(extra_loading_move);
+        OPT_PTR(tip_to_cooling_distance);
     }
 };
 

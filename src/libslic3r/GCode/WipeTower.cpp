@@ -486,6 +486,7 @@ WipeTower::WipeTower(const PrintConfig& config, const std::vector<std::vector<fl
         m_cooling_tube_length     = float(config.cooling_tube_length);
         m_parking_pos_retraction  = float(config.parking_pos_retraction);
         m_extra_loading_move      = float(config.extra_loading_move);
+        m_tip_to_cooling_distance = float(config.tip_to_cooling_distance);
         m_set_extruder_trimpot    = config.high_current_on_filament_swap;
     }
     // Calculate where the priming lines should be - very naive test not detecting parallelograms or custom shapes
@@ -934,9 +935,9 @@ void WipeTower::toolchange_Unload(
     float old_x = writer.x();
     float turning_point = (!m_left_to_right ? xl : xr );
     if (m_semm && (m_cooling_tube_retraction != 0 || m_cooling_tube_length != 0)) {
-        float total_retraction_distance = m_cooling_tube_retraction + m_cooling_tube_length/2.f - 15.f; // the 15mm is reserved for the first part after ramming
+        float total_retraction_distance = m_cooling_tube_retraction + m_cooling_tube_length/2.f - m_tip_to_cooling_distance; // the first part of the ramming is reserved to get the tip out of the melt zone
         writer.suppress_preview()
-              .retract(15.f, m_filpar[m_current_tool].unloading_speed_start * 60.f) // feedrate 5000mm/min = 83mm/s
+              .retract(m_tip_to_cooling_distance, m_filpar[m_current_tool].unloading_speed_start * 60.f) // feedrate 5000mm/min = 83mm/s
               .retract(0.70f * total_retraction_distance, 1.0f * m_filpar[m_current_tool].unloading_speed * 60.f)
               .retract(0.20f * total_retraction_distance, 0.5f * m_filpar[m_current_tool].unloading_speed * 60.f)
               .retract(0.10f * total_retraction_distance, 0.3f * m_filpar[m_current_tool].unloading_speed * 60.f)

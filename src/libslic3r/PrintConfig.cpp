@@ -1395,6 +1395,14 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(-2.f));
 
+    def = this->add("tip_to_cooling_distance", coFloat);
+    def->label = L("Tip to cooling distance");
+    def->tooltip = L("The distance from the tip of the nozzle to the start of the cooling tube. This length will be "
+                     "retracted in the first ramming step when changing the tool.");
+    def->sidetext = L("mm");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionFloat(15.f));
+
     def = this->add("perimeter_acceleration", coFloat);
     def->label = L("Perimeters");
     def->tooltip = L("This is the acceleration your printer will use for perimeters. "

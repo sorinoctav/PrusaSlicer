@@ -210,6 +210,7 @@ bool Print::invalidate_state_by_config_options(const std::vector<t_config_option
             || opt_key == "cooling_tube_retraction"
             || opt_key == "cooling_tube_length"
             || opt_key == "extra_loading_move"
+            || opt_key == "tip_to_cooling_distance"
             || opt_key == "z_offset") {
             steps.emplace_back(psWipeTower);
             steps.emplace_back(psSkirt);
